@@ -194,7 +194,7 @@
         .bouncy-image-container {
             width: 200px;
             max-width: 80%;
-            margin: 15px auto;
+            margin: 15px auto 15px auto;
             animation: bounce 2s ease-in-out infinite alternate;
         }
 
@@ -255,6 +255,21 @@
             border-radius: 20px;
             filter: drop-shadow(0 6px 15px rgba(255, 105, 180, 0.25));
         }
+
+        /* GIF Container (Now placed directly under image2.png) */
+        .gif-container {
+            width: 400px;
+            max-width: 100%;
+            margin: 20px auto 10px auto;
+        }
+
+        .gif-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 15px;
+            filter: drop-shadow(0 4px 10px rgba(255, 105, 180, 0.25));
+        }
     </style>
 </head>
 <body>
@@ -269,7 +284,7 @@
         <div class="bg-balloon" style="left: 90%; animation-delay: 1.8s;">🎈</div>
     </div>
 
-    <!-- Relative audio path without leading slash -->
+    <!-- Background music audio player -->
     <audio id="bg-music" src="song.mp3" loop preload="auto"></audio>
 
     <div id="popup-1" class="popup-container">
@@ -299,9 +314,10 @@
         <div class="balloon-banner">
             <div class="balloon-item">🎈 Happy</div>
             <div class="balloon-item"> Birthday</div>
-            <div class="balloon-item">Anaya! 🎈</div>
+            <div class="balloon-item">Anaya Gendu! 🎈</div>
         </div>
 
+        <!-- Person Image -->
         <div class="bouncy-image-container">
             <img src="imgae.png" alt="Anaya">
         </div>
@@ -311,7 +327,7 @@
             May your day be filled with endless smiles and joy! 💖✨
         </p>
 
-        <!-- Fixed video path without leading slash -->
+        <!-- Video Player -->
         <div class="video-player-container">
             <video id="myVideo" controls playsinline poster="imgae.png">
                 <source src="vid.mp4" type="video/mp4">
@@ -319,13 +335,20 @@
             </video>
         </div>
 
-        <!-- Added bottom image right under the video -->
+        <!-- Bottom Image -->
         <div class="bottom-image-container">
             <img src="image2.png" alt="Birthday Celebration">
+        </div>
+
+        <!-- GIF Animation placed directly under image2.png -->
+        <div class="gif-container">
+            <img src="gif.gif" alt="Birthday Animation">
         </div>
     </div>
 
     <script>
+        let isUserMuted = false;
+
         // Generate Twinkling Stars
         const starsContainer = document.getElementById('stars-container');
         for (let i = 0; i < 25; i++) {
@@ -345,7 +368,6 @@
             document.getElementById('popup-' + current).style.display = 'none';
             document.getElementById('popup-' + (current + 1)).style.display = 'flex';
             
-            // Warm up audio buffer on tap
             const music = document.getElementById('bg-music');
             music.load();
         }
@@ -357,12 +379,15 @@
 
             fireConfetti();
             playAudio();
+            setupVideoAudioControls();
         }
 
         function playAudio() {
             const music = document.getElementById('bg-music');
             const btn = document.getElementById('music-toggle');
             
+            if (isUserMuted) return;
+
             music.currentTime = 0;
             const playPromise = music.play();
 
@@ -382,11 +407,41 @@
 
             if (music.paused) {
                 music.play();
+                isUserMuted = false;
                 btn.innerText = "🎵 Sound: Playing";
             } else {
                 music.pause();
-                btn.innerText = "🔇 Sound: Muted";
+                isUserMuted = true;
+                btn.innerText = "0; Sound: Muted";
             }
+        }
+
+        // Pause background music when video plays, resume when paused/finished
+        function setupVideoAudioControls() {
+            const video = document.getElementById('myVideo');
+            const music = document.getElementById('bg-music');
+            const btn = document.getElementById('music-toggle');
+
+            video.addEventListener('play', () => {
+                if (!music.paused) {
+                    music.pause();
+                    btn.innerText = "⏸ Sound: Paused (Video Playing)";
+                }
+            });
+
+            video.addEventListener('pause', () => {
+                if (!isUserMuted) {
+                    music.play();
+                    btn.innerText = "🎵 Sound: Playing";
+                }
+            });
+
+            video.addEventListener('ended', () => {
+                if (!isUserMuted) {
+                    music.play();
+                    btn.innerText = "🎵 Sound: Playing";
+                }
+            });
         }
 
         // Confetti Burst Function
